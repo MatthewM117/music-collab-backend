@@ -17,7 +17,12 @@ io.on('connection', (socket) => {
     console.log(`User ${socket.id} connected`)
 
     socket.on('join_room', (data) => {
-        socket.join(data);
+        socket.join(data.room);
+        socket.to(data.room).emit('joined_room', data.username);
+
+        socket.on('disconnect', () => {
+            socket.to(data.room).emit('user_disconnected', data.username);
+        });
     });
 
     socket.on('update_grid', (data) => {
@@ -26,6 +31,10 @@ io.on('connection', (socket) => {
 
     socket.on('update_bpm', (data) => {
         socket.to(data.room).emit('receive_bpm', data);
+    });
+
+    socket.on('send_message', (data) => {
+        socket.to(data.room).emit('receive_message', data);
     });
 });
 
